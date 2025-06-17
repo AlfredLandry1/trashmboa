@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// prisma/schema.prisma
+// prisma/schema.prisma
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  nom       String
+  email     String   @unique
+  password  String
+  telephone String
+  adresse   String
+  photoUrl  String   @default("https://www.gravatar.com/avatar/?d=identicon")
+  role      Role     @default(USER)
+  dechets   Dechet[]
+  signalements Signalement[]
+  sessions  Session[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Dechet {
+  id        Int          @id @default(autoincrement())
+  type      TypeDechet
+  quantite  Float
+  adresse   String
+  ville     String
+  user      User         @relation(fields: [userId], references: [id])
+  userId    Int
+  statut    StatutDechet @default(EN_ATTENTE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model Signalement {
+  id        Int      @id @default(autoincrement())
+  type      String
+  latitude  Float
+  longitude Float
+  status    String   @default("en_attente") // ou enum
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  refreshToken String @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  USER // Citoyen
+  COLLECTOR // Agent de collecte
+  ADMIN
+}
+
+enum TypeDechet {
+  ORGANIQUE
+  PLASTIQUE
+  PAPIER
+  METAL
+  VERRE
+  DANGEREUX
+}
+
+enum StatutDechet {
+  EN_ATTENTE
+  COLLECTE
+  TRAITE
+}
