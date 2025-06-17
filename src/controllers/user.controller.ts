@@ -144,3 +144,37 @@ export const update = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
+
+export const getMe = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    
+    if (!userId) {
+      res.status(401).json({ message: "Non authentifié" });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        nom: true,
+        email: true,
+        telephone: true,
+        adresse: true,
+        photoUrl: true,
+        role: true,
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({ message: "Utilisateur non trouvé" });
+      return;
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};

@@ -1,0 +1,36 @@
+{
+  "id": "trash-mboa-api-env",
+  "name": "Trash Mboa API Environment",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "dechet_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "signalement_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ]
+} 

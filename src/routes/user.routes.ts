@@ -9,6 +9,7 @@ const router = Router();
 router.post('/', userController.create);
 
 // Routes protégées
+router.get('/me', authenticate, userController.getMe);
 router.get('/', authenticate, authorize(['ADMIN']), userController.getAll);
 router.get('/:id', authenticate, userController.getById);
 router.put('/:id', authenticate, userController.update);

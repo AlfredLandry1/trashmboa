@@ -4,6 +4,9 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
+import statsRoutes from './routes/stats.routes';
+import collecteRoutes from './routes/collecte.routes';
+import geoRoutes from './routes/geo.routes';
 
 const app = express();
 
@@ -21,8 +24,11 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Routes
-app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/collectes', collecteRoutes);
+app.use('/api/geo', geoRoutes);
 
 // Gestion des erreurs 404
 app.use((req, res) => {

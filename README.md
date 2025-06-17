@@ -106,6 +106,12 @@ Content-Type: application/json
 }
 ```
 
+#### Obtenir les informations de l'utilisateur connecté
+```http
+GET /api/users/me
+Authorization: Bearer <access_token>
+```
+
 #### Lister tous les utilisateurs (Admin uniquement)
 ```http
 GET /api/users
@@ -230,6 +236,206 @@ DELETE /api/dechets/:id
 Authorization: Bearer <access_token>
 ```
 
+### Collectes (Collecteur uniquement)
+
+#### Voir les déchets en attente
+```http
+GET /api/collectes/a-faire
+Authorization: Bearer <access_token>
+```
+
+Réponse :
+```json
+[
+  {
+    "id": 1,
+    "type": "PLASTIQUE",
+    "quantite": 2.5,
+    "adresse": "Douala, Akwa",
+    "ville": "Douala",
+    "statut": "EN_ATTENTE",
+    "createdAt": "2024-03-17T10:00:00Z",
+    "user": {
+      "nom": "John Doe",
+      "telephone": "+237612345678",
+      "adresse": "Douala, Akwa"
+    }
+  }
+]
+```
+
+#### Valider une collecte
+```http
+POST /api/collectes/:id/valider
+Authorization: Bearer <access_token>
+```
+
+Réponse :
+```json
+{
+  "message": "Collecte validée avec succès",
+  "dechet": {
+    "id": 1,
+    "type": "PLASTIQUE",
+    "quantite": 2.5,
+    "adresse": "Douala, Akwa",
+    "ville": "Douala",
+    "statut": "COLLECTE",
+    "createdAt": "2024-03-17T10:00:00Z",
+    "user": {
+      "nom": "John Doe",
+      "telephone": "+237612345678",
+      "adresse": "Douala, Akwa"
+    }
+  }
+}
+```
+
+### Statistiques (Admin uniquement)
+
+#### Tableau de bord
+```http
+GET /api/stats/dashboard
+Authorization: Bearer <access_token>
+```
+
+Réponse :
+```json
+{
+  "totalUsers": 100,
+  "totalDechets": 500,
+  "totalSignalements": 200
+}
+```
+
+#### Statistiques des déchets
+```http
+GET /api/stats/dechets
+Authorization: Bearer <access_token>
+```
+
+Réponse :
+```json
+{
+  "parType": [
+    { "type": "PLASTIQUE", "_count": 150 },
+    { "type": "PAPIER", "_count": 100 }
+  ],
+  "parStatut": [
+    { "statut": "EN_ATTENTE", "_count": 200 },
+    { "statut": "COLLECTE", "_count": 150 }
+  ]
+}
+```
+
+#### Statistiques des signalements
+```http
+GET /api/stats/signalements
+Authorization: Bearer <access_token>
+```
+
+Réponse :
+```json
+{
+  "parType": [
+    { "type": "MENAGER", "_count": 80 },
+    { "type": "DANGEREUX", "_count": 20 }
+  ],
+  "parStatut": [
+    { "status": "en_attente", "_count": 100 },
+    { "status": "en_cours", "_count": 50 }
+  ]
+}
+```
+
+### Géolocalisation
+
+#### Obtenir les déchets et signalements à proximité
+- **Route:** `GET /api/geo/proximite`
+- **Headers requis:**
+  - `Authorization: Bearer <access_token>`
+- **Paramètres de requête:**
+  - `latitude` (obligatoire): Latitude de la position
+  - `longitude` (obligatoire): Longitude de la position
+  - `rayon` (optionnel, défaut: 5): Rayon de recherche en kilomètres
+  - `type` (optionnel, défaut: 'all'): Type de résultats ('dechets', 'signalements', 'all')
+- **Exemple de réponse:**
+```json
+{
+  "dechets": [
+    {
+      "id": 1,
+      "type": "PLASTIQUE",
+      "quantite": 2,
+      "description": "Bouteilles en plastique",
+      "statut": "EN_ATTENTE",
+      "latitude": 4.0511,
+      "longitude": 9.7679,
+      "distance": 0.5,
+      "utilisateur": {
+        "id": 1,
+        "nom": "John Doe",
+        "telephone": "237612345678",
+        "adresse": "Douala, Akwa"
+      }
+    }
+  ],
+  "signalements": [
+    {
+      "id": 1,
+      "type": "DECHET_SAUVAGE",
+      "description": "Déchets abandonnés",
+      "statut": "EN_ATTENTE",
+      "latitude": 4.0512,
+      "longitude": 9.7680,
+      "distance": 0.7,
+      "utilisateur": {
+        "id": 1,
+        "nom": "John Doe",
+        "telephone": "237612345678",
+        "adresse": "Douala, Akwa"
+      }
+    }
+  ]
+}
+```
+
+### Historique
+
+#### Obtenir l'historique des actions
+- **Route:** `GET /api/historique`
+- **Headers requis:**
+  - `Authorization: Bearer <access_token>`
+- **Paramètres de requête:**
+  - `type` (optionnel): Type d'action ('DECHET' ou 'SIGNALEMENT')
+  - `startDate` (optionnel): Date de début (format: YYYY-MM-DD)
+  - `endDate` (optionnel): Date de fin (format: YYYY-MM-DD)
+- **Exemple de réponse:**
+```json
+{
+  "total": 2,
+  "historique": [
+    {
+      "type": "DECHET",
+      "action": "EN_ATTENTE",
+      "details": {
+        "typeDechet": "PLASTIQUE",
+        "quantite": 2.5
+      },
+      "date": "2024-03-17T10:00:00Z"
+    },
+    {
+      "type": "SIGNALEMENT",
+      "action": "en_attente",
+      "details": {
+        "typeSignalement": "DECHET_SAUVAGE"
+      },
+      "date": "2024-03-17T09:30:00Z"
+    }
+  ]
+}
+```
+
 ## Collection Postman
 
 Importez la collection suivante dans Postman pour tester l'API :
@@ -295,25 +501,16 @@ Importez la collection suivante dans Postman pour tester l'API :
       "name": "Users",
       "item": [
         {
-          "name": "Create User",
+          "name": "Get Me",
           "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/users",
+            "method": "GET",
+            "url": "{{base_url}}/api/users/me",
             "header": [
               {
                 "key": "Authorization",
                 "value": "Bearer {{access_token}}"
               }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nom\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"password123\",\n  \"telephone\": \"+237612345679\",\n  \"adresse\": \"Douala, Bonanjo\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
+            ]
           }
         },
         {
@@ -380,6 +577,94 @@ Importez la collection suivante dans Postman pour tester l'API :
       ]
     },
     {
+      "name": "Dechets",
+      "item": [
+        {
+          "name": "Create Dechet",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/dechets",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PLASTIQUE\",\n  \"quantite\": 2.5,\n  \"adresse\": \"Douala, Akwa\",\n  \"ville\": \"Douala\",\n  \"latitude\": 4.0511,\n  \"longitude\": 9.7679\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get All Dechets",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/dechets",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Get Dechet by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/dechets/:id",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Update Dechet",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/dechets/:id",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"COLLECTE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Dechet",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/dechets/:id",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "Signalements",
       "item": [
         {
@@ -395,7 +680,7 @@ Importez la collection suivante dans Postman pour tester l'API :
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"type\": \"MENAGER\",\n  \"latitude\": 4.0511,\n  \"longitude\": 9.7679,\n  \"description\": \"Déchets ménagers non collectés\"\n}",
+              "raw": "{\n  \"type\": \"DECHET_SAUVAGE\",\n  \"latitude\": 4.0511,\n  \"longitude\": 9.7679,\n  \"description\": \"Déchets abandonnés\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -468,35 +753,44 @@ Importez la collection suivante dans Postman pour tester l'API :
       ]
     },
     {
-      "name": "Dechets",
+      "name": "Collectes",
       "item": [
         {
-          "name": "Create Dechet",
+          "name": "Get Collectes à Faire",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/collectes/a-faire",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Valider Collecte",
           "request": {
             "method": "POST",
-            "url": "{{base_url}}/api/dechets",
+            "url": "{{base_url}}/api/collectes/:id/valider",
             "header": [
               {
                 "key": "Authorization",
                 "value": "Bearer {{access_token}}"
               }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"type\": \"PLASTIQUE\",\n  \"quantite\": 2.5,\n  \"adresse\": \"Douala, Akwa\",\n  \"ville\": \"Douala\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
+            ]
           }
-        },
+        }
+      ]
+    },
+    {
+      "name": "Stats",
+      "item": [
         {
-          "name": "Get All Dechets",
+          "name": "Get Dashboard Stats",
           "request": {
             "method": "GET",
-            "url": "{{base_url}}/api/dechets",
+            "url": "{{base_url}}/api/stats/dashboard",
             "header": [
               {
                 "key": "Authorization",
@@ -506,10 +800,10 @@ Importez la collection suivante dans Postman pour tester l'API :
           }
         },
         {
-          "name": "Get Dechet by ID",
+          "name": "Get Dechets Stats",
           "request": {
             "method": "GET",
-            "url": "{{base_url}}/api/dechets/:id",
+            "url": "{{base_url}}/api/stats/dechets",
             "header": [
               {
                 "key": "Authorization",
@@ -519,36 +813,82 @@ Importez la collection suivante dans Postman pour tester l'API :
           }
         },
         {
-          "name": "Update Dechet",
+          "name": "Get Signalements Stats",
           "request": {
-            "method": "PUT",
-            "url": "{{base_url}}/api/dechets/:id",
+            "method": "GET",
+            "url": "{{base_url}}/api/stats/signalements",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Geo",
+      "item": [
+        {
+          "name": "Get Proximite",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/geo/proximite",
             "header": [
               {
                 "key": "Authorization",
                 "value": "Bearer {{access_token}}"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"statut\": \"COLLECTE\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+            "query": [
+              {
+                "key": "latitude",
+                "value": "4.0511"
+              },
+              {
+                "key": "longitude",
+                "value": "9.7679"
+              },
+              {
+                "key": "rayon",
+                "value": "5"
+              },
+              {
+                "key": "type",
+                "value": "all"
               }
-            }
+            ]
           }
-        },
+        }
+      ]
+    },
+    {
+      "name": "Historique",
+      "item": [
         {
-          "name": "Delete Dechet",
+          "name": "Get Historique",
           "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/dechets/:id",
+            "method": "GET",
+            "url": "{{base_url}}/api/historique",
             "header": [
               {
                 "key": "Authorization",
                 "value": "Bearer {{access_token}}"
+              }
+            ],
+            "query": [
+              {
+                "key": "type",
+                "value": "DECHET"
+              },
+              {
+                "key": "startDate",
+                "value": "2024-03-01"
+              },
+              {
+                "key": "endDate",
+                "value": "2024-03-17"
               }
             ]
           }
