@@ -3,7 +3,69 @@ import bcrypt from "bcrypt";
 import { prisma } from "../config/db";
 import { createSession } from "../services/session.service";
 
-// Inscription
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Inscription d'un nouvel utilisateur
+ *     tags: [Authentification]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nom
+ *               - email
+ *               - password
+ *             properties:
+ *               nom:
+ *                 type: string
+ *                 description: Nom de l'utilisateur
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email de l'utilisateur
+ *               password:
+ *                 type: string
+ *                 minLength: 6
+ *                 description: Mot de passe (minimum 6 caractères)
+ *               telephone:
+ *                 type: string
+ *                 description: Numéro de téléphone
+ *               adresse:
+ *                 type: string
+ *                 description: Adresse de l'utilisateur
+ *     responses:
+ *       201:
+ *         description: Utilisateur créé avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   description: Token d'accès JWT
+ *                 refreshToken:
+ *                   type: string
+ *                   description: Token de rafraîchissement
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Email déjà utilisé
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Erreur serveur
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const { nom, email, password, telephone, adresse } = req.body;
@@ -50,7 +112,58 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// Connexion
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Connexion d'un utilisateur
+ *     tags: [Authentification]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email de l'utilisateur
+ *               password:
+ *                 type: string
+ *                 description: Mot de passe
+ *     responses:
+ *       200:
+ *         description: Connexion réussie
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   description: Token d'accès JWT
+ *                 refreshToken:
+ *                   type: string
+ *                   description: Token de rafraîchissement
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Email ou mot de passe incorrect
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Erreur serveur
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
@@ -90,7 +203,38 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// Déconnexion
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Déconnexion d'un utilisateur
+ *     tags: [Authentification]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Déconnexion réussie
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Déconnexion réussie"
+ *       401:
+ *         description: Non autorisé
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Erreur serveur
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export const logout = async (req: Request, res: Response): Promise<void> => {
   try {
     res.status(200).json({ message: "Déconnexion réussie" });

@@ -2,6 +2,8 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
+import swaggerUi from 'swagger-ui-express';
+import { specs } from './config/swagger';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import statsRoutes from './routes/stats.routes';
@@ -22,6 +24,25 @@ const limiter = rateLimit({
   message: 'Trop de requêtes depuis cette IP, veuillez réessayer plus tard'
 });
 app.use(limiter);
+
+// Documentation Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Trash Mboa API Documentation',
+  customfavIcon: '/favicon.ico',
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayRequestDuration: true,
+    filter: true,
+    showExtensions: true
+  }
+}));
+
+// Route pour récupérer la spécification OpenAPI en JSON
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(specs);
+});
 
 // Routes
 app.use('/api/users', userRoutes);

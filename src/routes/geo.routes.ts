@@ -7,4 +7,4 @@ const router = Router();
 // Route protégée (tous les utilisateurs authentifiés)
 router.get('/proximite', authenticate, geoController.getProximite);
 
-export default router; 
+export default router;
