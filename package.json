@@ -34,7 +34,13 @@
     "@types/express": "^5.0.3",
     "@types/helmet": "^4.0.0",
     "@types/jsonwebtoken": "^8.5.9",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^24.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.36.0",
+    "@typescript-eslint/parser": "^8.36.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.5",
+    "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

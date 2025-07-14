@@ -19,6 +19,7 @@ model dechet {
   updatedAt DateTime
   latitude  Float?
   longitude Float?
+  photo     String? // URL Cloudinary de la photo
   user      user          @relation(fields: [userId], references: [id], map: "Dechet_userId_fkey")
 
   @@index([userId], map: "Dechet_userId_fkey")
@@ -38,14 +39,16 @@ model session {
 }
 
 model signalement {
-  id        Int      @id @default(autoincrement())
-  type      String
-  latitude  Float
-  longitude Float
-  status    String   @default("en_attente")
-  createdAt DateTime @default(now())
-  userId    Int
-  user      user     @relation(fields: [userId], references: [id], map: "Signalement_userId_fkey")
+  id          Int      @id @default(autoincrement())
+  type        String
+  latitude    Float
+  longitude   Float
+  status      String   @default("en_attente")
+  createdAt   DateTime @default(now())
+  userId      Int
+  description String?  // Description du signalement
+  photo       String?  // URL de la photo (optionnel)
+  user        user     @relation(fields: [userId], references: [id], map: "Signalement_userId_fkey")
 
   @@index([userId], map: "Signalement_userId_fkey")
 }

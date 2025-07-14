@@ -1,8 +1,8 @@
 // src/controllers/user.controller.ts
-import { Request, Response } from "express";
-import * as userService from "../services/user.service";
-import { prisma } from "../config/db";
-import bcrypt from "bcrypt";
+import { Request, Response } from 'express';
+import * as userService from '../services/user.service';
+import { prisma } from '../config/db';
+import bcrypt from 'bcrypt';
 
 /**
  * @swagger
@@ -68,7 +68,8 @@ export const create = async (req: Request, res: Response): Promise<void> => {
         password: hashedPassword,
         telephone,
         adresse,
-        photoUrl: photoUrl || "https://www.gravatar.com/avatar/?d=identicon",
+        photoUrl: photoUrl || 'https://www.gravatar.com/avatar/?d=identicon',
+        updatedAt: new Date(),
       },
     });
 
@@ -82,8 +83,9 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       role: user.role,
     });
   } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
@@ -91,10 +93,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const result = await userService.loginUser(email, password);
     res.json(result);
-  } catch (err: any) {
-    res.status(401).json({ error: err.message });
+  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    res.status(401).json({ error: (err as Error).message });
   }
 };
 
@@ -145,7 +149,7 @@ export const getAll = async (req: Request, res: Response): Promise<void> => {
     res.json(users);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
@@ -208,14 +212,14 @@ export const getById = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (!user) {
-      res.status(404).json({ message: "Utilisateur non trouvé" });
+      res.status(404).json({ message: 'Utilisateur non trouvé' });
       return;
     }
 
     res.json(user);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
@@ -284,7 +288,7 @@ export const getById = async (req: Request, res: Response): Promise<void> => {
 export const update = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { nom, email, password, telephone, adresse, photoUrl } = req.body;
+    const { nom, email, password, telephone, adresse, photoUrl, role } = req.body;
 
     const updateData: any = {};
     if (nom) updateData.nom = nom;
@@ -293,6 +297,10 @@ export const update = async (req: Request, res: Response): Promise<void> => {
     if (telephone) updateData.telephone = telephone;
     if (adresse) updateData.adresse = adresse;
     if (photoUrl) updateData.photoUrl = photoUrl;
+    // Seul un admin peut modifier le rôle
+    if (role && req.user?.role === 'ADMIN') {
+      updateData.role = role;
+    }
 
     const user = await prisma.user.update({
       where: { id: Number(id) },
@@ -310,7 +318,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
@@ -356,7 +364,7 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
     res.status(204).send();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
@@ -399,7 +407,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     const userId = req.user?.userId;
     
     if (!userId) {
-      res.status(401).json({ message: "Non authentifié" });
+      res.status(401).json({ message: 'Non authentifié' });
       return;
     }
 
@@ -417,13 +425,78 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (!user) {
-      res.status(404).json({ message: "Utilisateur non trouvé" });
+      res.status(404).json({ message: 'Utilisateur non trouvé' });
       return;
     }
 
     res.json(user);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+/**
+ * @swagger
+ * /api/users/change-password:
+ *   post:
+ *     summary: Changer le mot de passe de l'utilisateur connecté
+ *     tags: [Utilisateurs]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ancienPassword
+ *               - nouveauPassword
+ *             properties:
+ *               ancienPassword:
+ *                 type: string
+ *                 description: Ancien mot de passe
+ *               nouveauPassword:
+ *                 type: string
+ *                 description: Nouveau mot de passe
+ *     responses:
+ *       200:
+ *         description: Mot de passe changé avec succès
+ *       400:
+ *         description: Ancien mot de passe incorrect ou données manquantes
+ *       401:
+ *         description: Non authentifié
+ *       500:
+ *         description: Erreur serveur
+ */
+export const changePassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ message: 'Non authentifié' });
+      return;
+    }
+    const { ancienPassword, nouveauPassword } = req.body;
+    if (!ancienPassword || !nouveauPassword) {
+      res.status(400).json({ message: 'Champs obligatoires manquants' });
+      return;
+    }
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      res.status(404).json({ message: 'Utilisateur non trouvé' });
+      return;
+    }
+    const isMatch = await bcrypt.compare(ancienPassword, user.password);
+    if (!isMatch) {
+      res.status(400).json({ message: 'Ancien mot de passe incorrect' });
+      return;
+    }
+    const hashed = await bcrypt.hash(nouveauPassword, 10);
+    await prisma.user.update({ where: { id: userId }, data: { password: hashed, updatedAt: new Date() } });
+    res.status(200).json({ message: 'Mot de passe changé avec succès' });
+  } catch (error) {
+    console.error('Erreur lors du changement de mot de passe :', error);
+    res.status(500).json({ message: 'Erreur serveur lors du changement de mot de passe' });
   }
 };

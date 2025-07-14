@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 import { validateSession } from '../services/session.service';
 
 interface TokenPayload {

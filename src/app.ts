@@ -9,6 +9,9 @@ import userRoutes from './routes/user.routes';
 import statsRoutes from './routes/stats.routes';
 import collecteRoutes from './routes/collecte.routes';
 import geoRoutes from './routes/geo.routes';
+import dechetRoutes from './routes/dechet.routes';
+import signalementRoutes from './routes/signalement.routes';
+import morgan from 'morgan';
 
 const app = express();
 
@@ -16,6 +19,7 @@ const app = express();
 app.use(helmet()); // Protection des en-têtes HTTP
 app.use(cors()); // Configuration CORS
 app.use(express.json()); // Parsing du JSON
+app.use(morgan('dev'));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -50,6 +54,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/collectes', collecteRoutes);
 app.use('/api/geo', geoRoutes);
+app.use('/api/dechets', dechetRoutes);
+app.use('/api/signalements', signalementRoutes);
 
 // Gestion des erreurs 404
 app.use((req, res) => {
@@ -57,6 +63,7 @@ app.use((req, res) => {
 });
 
 // Gestion globale des erreurs
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Erreur serveur' });

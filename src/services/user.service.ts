@@ -1,11 +1,11 @@
 // src/services/user.service.ts
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export const createUser = async (data: {
   nom: string;
@@ -20,6 +20,7 @@ export const createUser = async (data: {
     data: {
       ...data,
       password: hashedPassword,
+      updatedAt: new Date(),
     },
   });
 
@@ -30,13 +31,13 @@ export const createUser = async (data: {
 export const loginUser = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
 
-  if (!user) throw new Error("Email ou mot de passe incorrect");
+  if (!user) throw new Error('Email ou mot de passe incorrect');
 
   const valid = await bcrypt.compare(password, user.password);
-  if (!valid) throw new Error("Email ou mot de passe incorrect");
+  if (!valid) throw new Error('Email ou mot de passe incorrect');
 
   const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
-    expiresIn: "7d",
+    expiresIn: '7d',
   });
 
   const { password: _, ...userWithoutPassword } = user;

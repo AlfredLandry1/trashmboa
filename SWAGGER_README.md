@@ -1,10 +1,29 @@
-# Documentation Swagger UI - Trash Mboa API
+# Documentation Swagger - Trash Mboa API
 
-## 🚀 Accès à la documentation
+## Routes principales
+- Authentification : `/api/auth/login`, `/api/auth/register`
+- Utilisateurs : `/api/users`, `/api/users/me`, `/api/users/change-password`
+- Déchets : `/api/dechets`, `/api/dechets/{id}`
+- Collectes : `/api/collectes`, `/api/collectes/en-attente`, `/api/collectes/{id}/valider`
+- Signalements : `/api/signalements`, `/api/signalements/{id}`
+- Proximité : `/api/geo/proximite?latitude=...&longitude=...&rayon=5&type=dechets`
 
-Une fois le serveur démarré, vous pouvez accéder à la documentation Swagger UI à l'adresse suivante :
+## Paramètres de la route de proximité
+- `latitude` (obligatoire)
+- `longitude` (obligatoire)
+- `rayon` (optionnel, défaut 5)
+- `type` (optionnel, valeurs : `all`, `dechets`, `signalements`)
 
-**URL :** `http://localhost:3000/api-docs`
+## Statuts possibles pour un signalement
+- `en_attente` : signalement en attente de traitement
+- `resolu` ou `traite` : signalement résolu
+
+## Statuts HTTP
+Voir le README principal pour le tableau complet.
+
+---
+
+Consultez `/api-docs` pour la documentation interactive complète générée automatiquement.
 
 ## 📋 Fonctionnalités disponibles
 

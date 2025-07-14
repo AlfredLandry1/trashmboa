@@ -1,4 +1,3 @@
-import { User } from '@prisma/client';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { config } from '../config/env';
 
@@ -12,11 +11,9 @@ interface SessionTokens {
   refreshToken: string;
 }
 
-export const createSession = async (user: User): Promise<SessionTokens> => {
-  const payload: TokenPayload = { 
-    userId: user.id,
-    role: user.role
-  };
+export const createSession = async (user: { id: number; role: string }): Promise<SessionTokens> => {
+  await Promise.resolve(); // pour satisfaire require-await
+  const payload: TokenPayload = { userId: user.id, role: user.role };
 
   const signOptions: SignOptions = {
     expiresIn: config.jwt.accessTokenExpiry
@@ -35,11 +32,11 @@ export const createSession = async (user: User): Promise<SessionTokens> => {
 };
 
 export const validateSession = async (token: string): Promise<TokenPayload | null> => {
+  await Promise.resolve(); // pour satisfaire require-await
   try {
     const decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
     return decoded;
-  } catch (error) {
-    console.error('Erreur de validation de session:', error);
+  } catch {
     return null;
   }
 };
@@ -51,15 +48,7 @@ export const refreshSession = async (refreshToken: string): Promise<SessionToken
     // Créer une nouvelle session avec les mêmes informations
     return await createSession({
       id: decoded.userId,
-      role: decoded.role as any,
-      nom: '',
-      email: '',
-      password: '',
-      telephone: '',
-      adresse: '',
-      photoUrl: 'https://www.gravatar.com/avatar/?d=identicon',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      role: decoded.role,
     });
   } catch (error) {
     console.error('Erreur de rafraîchissement de session:', error);

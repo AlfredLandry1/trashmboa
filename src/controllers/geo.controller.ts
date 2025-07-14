@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { prisma } from "../config/db";
+import { Request, Response } from 'express';
+import { prisma } from '../config/db';
 
 // Fonction utilitaire pour calculer la distance en km entre deux points
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -19,7 +19,7 @@ export const getProximite = async (req: Request, res: Response): Promise<void> =
     const { latitude, longitude, rayon = 5, type = 'all' } = req.query;
     
     if (!latitude || !longitude) {
-      res.status(400).json({ message: "Latitude et longitude requises" });
+      res.status(400).json({ message: 'Latitude et longitude requises' });
       return;
     }
 
@@ -28,7 +28,7 @@ export const getProximite = async (req: Request, res: Response): Promise<void> =
     const radius = parseFloat(rayon as string);
 
     if (isNaN(lat) || isNaN(lon) || isNaN(radius)) {
-      res.status(400).json({ message: "Paramètres invalides" });
+      res.status(400).json({ message: 'Paramètres invalides' });
       return;
     }
 
@@ -110,6 +110,6 @@ export const getProximite = async (req: Request, res: Response): Promise<void> =
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 }; 

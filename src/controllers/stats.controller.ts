@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { prisma } from "../config/db";
+import { Request, Response } from 'express';
+import { prisma } from '../config/db';
 
 export const getDashboardStats = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -16,7 +16,7 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
@@ -38,7 +38,7 @@ export const getDechetsStats = async (req: Request, res: Response): Promise<void
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
@@ -60,6 +60,6 @@ export const getSignalementsStats = async (req: Request, res: Response): Promise
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 }; 

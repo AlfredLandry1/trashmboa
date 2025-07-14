@@ -155,10 +155,11 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 
 {
-  "description": "Déchets ménagers non collectés",
-  "localisation": "Douala, Akwa",
-  "type": "MENAGER",
-  "urgence": "MOYENNE"
+  "type": "DECHET_SAUVAGE",
+  "latitude": 4.0511,
+  "longitude": 9.7679,
+  "description": "Tas de déchets abandonnés",
+  "photo": "https://res.cloudinary.com/ton-cloud/image/upload/v.../photo.jpg"
 }
 ```
 
@@ -181,7 +182,8 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 
 {
-  "statut": "EN_COURS"
+  "description": "Nouveau commentaire",
+  "status": "en_cours"
 }
 ```
 
@@ -434,6 +436,43 @@ Réponse :
     }
   ]
 }
+```
+
+## Nouvelle route : Lister toutes les collectes
+
+### GET /api/collectes
+
+Liste toutes les collectes. Vous pouvez filtrer par statut avec le paramètre de requête `status`.
+
+**Exemples :**
+- `/api/collectes` : toutes les collectes
+- `/api/collectes?status=EN_ATTENTE` : collectes en attente
+
+**Paramètres de requête :**
+- `status` (optionnel) : EN_ATTENTE, EN_COURS, TERMINEE
+
+**Sécurité :**
+- Authentification requise (JWT)
+
+**Réponse :**
+```json
+[
+  {
+    "id": 1,
+    "type": "PLASTIQUE",
+    "quantite": 12.5,
+    "adresse": "Douala, Bonapriso",
+    "latitude": 4.05,
+    "longitude": 9.7,
+    "statut": "EN_ATTENTE",
+    "createdAt": "2024-07-13T12:00:00.000Z",
+    "user": {
+      "nom": "Toto",
+      "telephone": "+237690000000",
+      "adresse": "Douala, Bonapriso"
+    }
+  }
+]
 ```
 
 ## Collection Postman
@@ -923,3 +962,86 @@ src/
 ├── services/       # Services métier
 └── prisma/         # Schéma et migrations Prisma
 ```
+
+## Intégration frontend (exemple)
+
+Pour créer un signalement depuis le frontend :
+
+```js
+const res = await fetch('/api/signalements', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${accessToken}`
+  },
+  body: JSON.stringify({
+    type: 'DECHET_SAUVAGE',
+    latitude: 4.05,
+    longitude: 9.76,
+    description: 'Tas de déchets abandonnés',
+    photo: 'https://res.cloudinary.com/ton-cloud/image/upload/v.../photo.jpg'
+  })
+});
+const data = await res.json();
+```
+
+## Exemples d’utilisation des principales routes
+
+### Signalements
+- **Créer un signalement**
+  - `POST /api/signalements`
+  - Body : `{ "type": "DECHET_SAUVAGE", "latitude": 4.05, "longitude": 9.76, "description": "Tas de déchets", "photo": "url" }`
+- **Lister tous les signalements**
+  - `GET /api/signalements`
+- **Obtenir un signalement par ID**
+  - `GET /api/signalements/{id}`
+- **Mettre à jour un signalement**
+  - `PUT /api/signalements/{id}`
+  - Body : `{ "status": "resolu" }`
+- **Supprimer un signalement**
+  - `DELETE /api/signalements/{id}`
+
+### Utilisateurs
+- **Créer un utilisateur**
+  - `POST /api/users`
+  - Body : `{ "nom": "Toto", "email": "toto@mail.com", "password": "123456" }`
+- **Connexion**
+  - `POST /api/auth/login`
+  - Body : `{ "email": "toto@mail.com", "password": "123456" }`
+- **Récupérer son profil**
+  - `GET /api/users/me`
+- **Changer son mot de passe**
+  - `POST /api/users/change-password`
+  - Body : `{ "ancienPassword": "123456", "nouveauPassword": "abcdef" }`
+
+### Déchets
+- **Créer un déchet**
+  - `POST /api/dechets`
+  - Body : `{ "type": "PLASTIQUE", "quantite": 10, "adresse": "Douala", "ville": "Douala" }`
+- **Lister tous les déchets**
+  - `GET /api/dechets`
+- **Obtenir un déchet par ID**
+  - `GET /api/dechets/{id}`
+- **Mettre à jour un déchet**
+  - `PUT /api/dechets/{id}`
+- **Supprimer un déchet**
+  - `DELETE /api/dechets/{id}`
+
+### Proximité
+- **Lister les déchets ou signalements proches**
+  - `GET /api/geo/proximite?latitude=4.05&longitude=9.71&rayon=5&type=dechets`
+
+---
+
+## Statuts HTTP utilisés
+
+| Code | Signification                | Quand ?                                                      |
+|------|------------------------------|--------------------------------------------------------------|
+| 200  | OK                           | Requête réussie, réponse avec données                        |
+| 201  | Created                      | Création réussie (ex : nouvel utilisateur, signalement, etc.)|
+| 204  | No Content                   | Suppression réussie, pas de contenu à retourner              |
+| 400  | Bad Request                  | Mauvaise requête (paramètre manquant, format invalide, etc.) |
+| 401  | Unauthorized                 | Non authentifié (token manquant ou invalide)                 |
+| 403  | Forbidden                    | Accès refusé (droit insuffisant)                             |
+| 404  | Not Found                    | Ressource non trouvée (ex : ID inexistant)                   |
+| 500  | Internal Server Error        | Erreur interne du serveur                                    |
