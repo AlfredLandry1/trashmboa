@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node dist/server.js",
     "build": "tsc",
+    "start": "npx prisma migrate deploy && node dist/server.js",
     "dev": "ts-node src/server.ts",
     "test": "jest",
     "test:coverage": "jest --coverage"
