@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -22,7 +22,7 @@ model dechet {
   photo     String? // URL Cloudinary de la photo
   user      user          @relation(fields: [userId], references: [id], map: "Dechet_userId_fkey")
 
-  @@index([userId], map: "Dechet_userId_fkey")
+  @@index([userId], map: "Dechet_userId_idx")
 }
 
 model session {
@@ -35,7 +35,7 @@ model session {
   updatedAt    DateTime
   user         user     @relation(fields: [userId], references: [id], map: "Session_userId_fkey")
 
-  @@index([userId], map: "Session_userId_fkey")
+  @@index([userId], map: "Session_userId_idx")
 }
 
 model signalement {
@@ -50,7 +50,7 @@ model signalement {
   photo       String?  // URL de la photo (optionnel)
   user        user     @relation(fields: [userId], references: [id], map: "Signalement_userId_fkey")
 
-  @@index([userId], map: "Signalement_userId_fkey")
+  @@index([userId], map: "Signalement_userId_idx")
 }
 
 model user {
